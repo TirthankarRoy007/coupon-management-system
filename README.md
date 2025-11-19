@@ -67,7 +67,7 @@ Promotional offers where buying certain products grants free products.
 4. **Maximum Discount Cap**: Percentage discount with a maximum discount limit
 
 #### Unimplemented Cases:
-1. **Minimum Item Count**: Cart must have minimum number of items (reason: time constraint)
+1. **Minimum Order Value**: Cart must have a minimum order value to have a discount
 2. **Category-based Cart Discount**: Discount applies only if cart contains items from specific categories
 3. **User-specific Cart Discounts**: Different discount rates for different user tiers (VIP, regular, etc.)
 4. **Time-bound Flash Sales**: Higher discounts during specific time windows
