@@ -2,9 +2,13 @@
   "name": "coupon-management-system",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "nodemon --watch src --ext ts,js,json --exec \"npm run build && node dist/app.js\"",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -31,6 +35,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mysql2": "^3.15.3",
+    "nodemon": "^3.1.11",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.7"
   }
