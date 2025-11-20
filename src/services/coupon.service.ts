@@ -5,17 +5,46 @@ import {
   calculateCartWiseDiscount,
 } from "./couponTypes";
 import { calculateProductWiseDiscount } from "./couponTypes/ProductWise/productWiseCalculator";
+import { Op } from "sequelize";
 
 const couponService = {
   async createCoupon(payload: CouponAttributes): Promise<CouponAttributes> {
-    const created = await Coupon.create(payload as any);
+
+    const filteredPayload = Object.fromEntries(
+      Object.entries(payload).filter(([_, value]) => value !== null && value !== undefined)
+    ) as Partial<CouponAttributes>;
+
+    if (filteredPayload.code) {
+      const existing = await Coupon.findOne({
+        where: { code: filteredPayload.code.trim() },
+      });
+  
+      if (existing) {
+        throw new Error("Coupon with this code already exists");
+      }
+    }
+
+    const created = await Coupon.create(filteredPayload as any);
     return created.toJSON() as CouponAttributes;
   },
 
-  async listCoupons(): Promise<CouponAttributes[]> {
-    const coupons = await Coupon.findAll();
-    return coupons.map((c) => c.toJSON() as CouponAttributes);
-  },
+  async listCoupons(page?: number, limit?: number): Promise<any> {
+    const options: any = {
+      distinct: true
+    };
+
+    if (page && limit) {
+      options.limit = limit;
+      options.offset = (page - 1) * limit;
+    }
+  
+    const result = await Coupon.findAndCountAll(options);
+  
+    return {
+      total: result.count,
+      data: result.rows.map((c) => c.toJSON() as CouponAttributes),
+    };
+  },  
 
   async getCouponById(id: number): Promise<CouponAttributes | null> {
     const coupon = await Coupon.findByPk(id);
@@ -28,7 +57,21 @@ const couponService = {
   ): Promise<CouponAttributes> {
     const coupon = await Coupon.findByPk(id);
     if (!coupon) throw new Error("Coupon not found");
-
+  
+    //Check for duplicate coupon code BEFORE updating
+    if (body.code) {
+      const exists = await Coupon.findOne({
+        where: {
+          code: body.code,
+          id: { [Op.ne]: id }, 
+        },
+      });
+  
+      if (exists) {
+        throw new Error("Coupon code already exists");
+      }
+    }
+  
     await coupon.update(body);
     return coupon.toJSON() as CouponAttributes;
   },
@@ -186,14 +229,30 @@ const couponService = {
 
     if (!coupon.active) return false;
 
-    let cond: any =
-      coupon.conditions && typeof coupon.conditions === "string"
-        ? JSON.parse(coupon.conditions)
-        : coupon.conditions || {};
+    let cond: any = {};
 
-    cond = Object.fromEntries(
-      Object.entries(cond).map(([key, value]) => [key.trim(), value]),
-    );
+    if (coupon.conditions) {
+      // If conditions is stored as JSON string, parse it
+      if (typeof coupon.conditions === "string") {
+        try {
+          cond = JSON.parse(coupon.conditions);
+        } catch (e) {
+          cond = {};
+        }
+      } else {
+        cond = coupon.conditions;
+      }
+    }
+    
+    // Normalize keys (trim spaces)
+    const cleaned: any = {};
+    for (const key in cond) {
+      const trimmedKey = key.trim();
+      cleaned[trimmedKey] = cond[key];
+    }
+    
+    cond = cleaned;
+    
 
     if (cond.startDate && new Date(cond.startDate) > now) {
       return false;

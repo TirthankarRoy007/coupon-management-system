@@ -8,18 +8,31 @@ const CouponsController = {
       const created = await couponService.createCoupon(payload);
       return res.status(201).json(created);
     } catch (err: any) {
-      throw err;
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to create coupon",
+      });
     }
   },
 
-  async listCoupons(_: Request, res: Response) {
+  async listCoupons(req: Request, res: Response) {
     try {
-      const coupons = await couponService.listCoupons();
-      return res.json(coupons);
+      const page = req.query.page ? Number(req.query.page) : undefined;
+      const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  
+      const coupons = await couponService.listCoupons(page, limit);
+  
+      return res.json({
+        success: true,
+        data: coupons,
+      });
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to fetch coupons",
+      });
     }
-  },
+  },  
 
   async getCouponById(req: Request, res: Response) {
     try {
@@ -28,7 +41,10 @@ const CouponsController = {
       if (!coupon) return res.status(404).json({ message: "Not found" });
       return res.json(coupon);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to fetch coupon",
+      });
     }
   },
 
@@ -38,7 +54,10 @@ const CouponsController = {
       const updated = await couponService.updateCoupon(id, req.body);
       return res.json(updated);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to update coupon",
+      });
     }
   },
 
@@ -48,7 +67,10 @@ const CouponsController = {
       await couponService.deleteCoupon(id);
       return res.status(204).send();
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to delete coupon",
+      });
     }
   },
 
@@ -61,7 +83,10 @@ const CouponsController = {
       const applicable = await couponService.findApplicable(cart);
       return res.json({ applicable_coupons: applicable });
     } catch (err: any) {
-      throw err;
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to check applicable coupons",
+      });
     }
   },
 
@@ -75,7 +100,10 @@ const CouponsController = {
       const updated = await couponService.applyCouponToCart(couponId, cart);
       return res.json(updated);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to apply coupon",
+      });
     }
   },
 };
