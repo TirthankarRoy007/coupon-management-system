@@ -8,24 +8,51 @@ import { calculateProductWiseDiscount } from "./couponTypes/ProductWise/productW
 import { Op } from "sequelize";
 
 const couponService = {
-  async createCoupon(payload: CouponAttributes): Promise<CouponAttributes> {
+  async createCoupon(payload: CouponAttributes) {
+    const {
+      code,
+      type,
+      details,
+      conditions,
+      active = true,
+      usageLimitGlobal,
+      usageLimitPerUser,
+    } = payload;
 
-    const filteredPayload = Object.fromEntries(
-      Object.entries(payload).filter(([_, value]) => value !== null && value !== undefined)
-    ) as Partial<CouponAttributes>;
+    const existing = await Coupon.findOne({ where: { code } });
 
-    if (filteredPayload.code) {
-      const existing = await Coupon.findOne({
-        where: { code: filteredPayload.code.trim() },
-      });
-  
-      if (existing) {
-        throw new Error("Coupon with this code already exists");
+    if (existing) {
+      throw new Error("A coupon with this code already exists.");
+    }
+
+    if (!code || !type || !details) {
+      throw new Error("Missing required fields: code, type or details.");
+    }
+
+    const allowedTypes = ["cart-wise", "product-wise", "bxgy"] as const;
+    if (!allowedTypes.includes(type)) {
+      throw new Error(`Invalid coupon type. Allowed: ${allowedTypes.join(", ")}`);
+    }
+
+    if (conditions && typeof conditions !== "string") {
+      if (conditions.startDate && conditions.endDate) {
+        if (new Date(conditions.startDate) > new Date(conditions.endDate)) {
+          throw new Error("startDate cannot be after endDate.");
+        }
       }
     }
 
-    const created = await Coupon.create(filteredPayload as any);
-    return created.toJSON() as CouponAttributes;
+    const createdCoupon = await Coupon.create({
+      code,
+      type,
+      details,
+      conditions,
+      active,
+      usageLimitGlobal,
+      usageLimitPerUser,
+    });
+
+    return createdCoupon;
   },
 
   async listCoupons(page?: number, limit?: number): Promise<any> {
@@ -37,34 +64,28 @@ const couponService = {
       options.limit = limit;
       options.offset = (page - 1) * limit;
     }
-  
+
     const result = await Coupon.findAndCountAll(options);
-  
+
     return {
       total: result.count,
       data: result.rows.map((c) => c.toJSON() as CouponAttributes),
     };
-  },  
+  },
 
   async getCouponById(id: number): Promise<CouponAttributes | null> {
     const coupon = await Coupon.findByPk(id);
     return coupon ? (coupon.toJSON() as CouponAttributes) : null;
   },
 
-  async updateCoupon(
-    id: number,
-    body: Partial<CouponAttributes>,
-  ): Promise<CouponAttributes> {
+  async updateCoupon(id: number, body: Partial<CouponAttributes>) {
     const coupon = await Coupon.findByPk(id);
     if (!coupon) throw new Error("Coupon not found");
   
-    //Check for duplicate coupon code BEFORE updating
+    // Duplicate code check
     if (body.code) {
       const exists = await Coupon.findOne({
-        where: {
-          code: body.code,
-          id: { [Op.ne]: id }, 
-        },
+        where: { code: body.code, id: { [Op.ne]: id } },
       });
   
       if (exists) {
@@ -72,9 +93,19 @@ const couponService = {
       }
     }
   
-    await coupon.update(body);
+    // Remove fields that are explicitly null
+    const sanitizedBody: any = {};
+    for (const key in body) {
+      if (body[key as keyof CouponAttributes] !== null) {
+        sanitizedBody[key] = body[key as keyof CouponAttributes];
+      }
+    }
+  
+    // Update remaining fields only
+    await coupon.update(sanitizedBody);
+  
     return coupon.toJSON() as CouponAttributes;
-  },
+  },  
 
   async deleteCoupon(id: number): Promise<void> {
     const coupon = await Coupon.findByPk(id);
@@ -243,16 +274,16 @@ const couponService = {
         cond = coupon.conditions;
       }
     }
-    
+
     // Normalize keys (trim spaces)
     const cleaned: any = {};
     for (const key in cond) {
       const trimmedKey = key.trim();
       cleaned[trimmedKey] = cond[key];
     }
-    
+
     cond = cleaned;
-    
+
 
     if (cond.startDate && new Date(cond.startDate) > now) {
       return false;

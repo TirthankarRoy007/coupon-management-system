@@ -127,21 +127,22 @@ export type BxGyDetailsUnion =
   | MixedBxGyDetails
   | CheapestBxGyDetails;
 
-export interface CouponAttributes {
-  id: number;
-  code: string;
-  type: "cart-wise" | "product-wise" | "bxgy";
-
-  details: CartWiseDetails | ProductWiseDetails | BxGyDetailsUnion;
-
-  conditions?: {
-    minCartValue?: number;
-    startDate?: string;
-    endDate?: string;
-    stackable?: boolean;
-  };
-
-  active: boolean;
-  usageLimitGlobal?: number;
-  usageLimitPerUser?: number;
-}
+  export interface CouponAttributes {
+    id: number;
+    code: string;
+    type: "cart-wise" | "product-wise" | "bxgy";
+  
+    details: CartWiseDetails | ProductWiseDetails | BxGyDetailsUnion;
+  
+    conditions?: {
+      minCartValue?: number;
+      startDate?: string;
+      endDate?: string;
+      stackable?: boolean;
+    } | string | null;
+  
+    active: boolean;
+    usageLimitGlobal?: number;
+    usageLimitPerUser?: number;
+  }
+  
