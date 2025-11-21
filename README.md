@@ -80,8 +80,7 @@ Promotional offers where buying certain products grants free products.
 3. **User-specific Cart Discounts**: Different discount rates for different user tiers (VIP, regular, etc.)
 4. **Time-bound Flash Sales**: Higher discounts during specific time windows
 5. **Shipping Cost Integration**: Free shipping or shipping discount on cart threshold
-6. **Combination with Loyalty Points**: Cart discount that also awards loyalty points
-7. **Progressive Discounts**: Increasing discount rate as cart value grows (e.g., 5% for ₹100, 10% for ₹500)
+6. **Progressive Discounts**: Increasing discount rate as cart value grows (e.g., 5% for ₹100, 10% for ₹500)
 
 ### Product-wise Coupon Cases
 
@@ -96,13 +95,11 @@ Promotional offers where buying certain products grants free products.
 
 1. **Variant-specific Discounts**: Discount on specific product variants (size, color)
 2. **Bundle Discounts**: Discount when specific products are bought together
-3. **Cross-product Discounts**: Buy Product A, get discount on Product B
-4. **Tiered Product Discounts**: Increasing discount with quantity (1-2 units: 5%, 3-5 units: 10%)
-5. **Brand-wide Discounts**: Apply discount to all products from a specific brand
-6. **Category-based Discounts**: Discount on all products in a category
-7. **New Product Launch Discounts**: Temporary discounts on newly launched products
-8. **Clearance Sale Discounts**: Higher discounts on products marked for clearance
-9. **Seasonal Product Discounts**: Discounts on seasonal items during off-season
+3. **Tiered Product Discounts**: Increasing discount with quantity (1-2 units: 5%, 3-5 units: 10%)
+4. **Category-based Discounts**: Discount on all products in a category
+5. **New Product Launch Discounts**: Temporary discounts on newly launched products
+6. **Clearance Sale Discounts**: Higher discounts on products marked for clearance
+7. **Seasonal Product Discounts**: Discounts on seasonal items during off-season
 
 ### BxGy Coupon Cases
 
@@ -118,12 +115,10 @@ Promotional offers where buying certain products grants free products.
 1. **Weighted BxGy**: Different products count differently (e.g., premium products count as 2x)
 2. **Tiered BxGy**: Buy 2 get 1 free, buy 4 get 3 free (increasing value)
 3. **Cross-category BxGy**: Buy from category A, get from category B
-4. **Partial BxGy Application**: When cart doesn't have enough "get" products, apply partial benefit
-5. **BxGy Priority Rules**: When multiple products qualify as "free", define priority rules beyond price
-6. **Minimum Value BxGy**: Buy products worth ₹X, get Y free
-7. **Same Product BxGy**: Buy 3 of Product X, get 1 of Product X free
-8. **BxGy with Exclusions**: Certain products excluded from being "free" items
-9. **Gift Products**: Instead of existing products, add gift products to cart
+4. **BxGy Priority Rules**: When multiple products qualify as "free", define priority rules beyond price
+5. **Minimum Value BxGy**: Buy products worth ₹X, get Y free
+6. **Same Product BxGy**: Buy 3 of Product X, get 1 of Product X free
+7. **BxGy with Exclusions**: Certain products excluded from being "free" items
 
 ### General Coupon Constraint Cases
 
@@ -303,10 +298,9 @@ Promotional offers where buying certain products grants free products.
 1. **No Caching**: Every request queries database; no caching mechanism implemented
 2. **No Rate Limiting**: API can be overwhelmed by excessive requests
 3. **Limited Error Messages**: Error messages could be more descriptive
-4. **No Audit Trail**: No tracking of who created/modified coupons or when
-5. **No Transaction Support**: Cart updates are not atomic; partial failures possible
-6. **Scalability**: Not optimized for high-concurrency scenarios
-7. **No API Versioning**: Breaking changes would affect all clients
+4. **No Transaction Support**: Cart updates are not atomic; partial failures possible
+5. **Scalability**: Not optimized for high-concurrency scenarios
+6. **No API Versioning**: Breaking changes would affect all clients
 
 ### Validation Limitations
 
@@ -358,10 +352,6 @@ cd coupon-management-system
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials
-
 # Start the server
 npm start
 ```
@@ -380,11 +370,6 @@ NODE_ENV=development
 # Run all tests
 npm test
 
-# Run with coverage
-npm run test:coverage
-
-# Run specific test suite
-npm test -- coupons.test.js
 ```
 
 ### Test Coverage
